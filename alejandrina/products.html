@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MotoShop - Products</title>
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial;background:#f5f5f5;color:#222;}
+
+  /* NAVBAR */
+  .navbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:15px 50px;
+    background:#b30000;
+    border-bottom:3px solid #7a0000;
+  }
+  .navbar .logo{ font-size:28px;font-weight:bold;color:white; }
+  .navbar ul{list-style:none;display:flex;gap:35px;}
+  .navbar ul li{ font-size:16px;font-weight:bold;cursor:pointer;color:white; }
+  .navbar ul li:hover{ color:#ffe3e3; text-shadow:0 0 8px #ffffff; }
+  .cart-count{color:#ffeded;font-weight:bold;}
+  .logout-btn{
+    padding:8px 18px;border-radius:8px;border:2px solid white;
+    background:white;color:#b30000;cursor:pointer;font-weight:bold;
+  }
+  .logout-btn:hover{background:#ffe6e6;}
+
+  /* SORT BOX */
+  .sort-box{
+    width:100%;
+    padding-left:50px;  
+    margin-top:25px;
+  }
+  .sort-box select{
+    padding:8px 18px;
+    border:2px solid #b30000;
+    border-radius:8px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+  }
+
+  /* PRODUCTS GRID */
+  .products-section{
+    display:flex;
+    flex-wrap:wrap;
+    gap:30px;
+    padding:50px;
+    justify-content:center;
+  }
+  .product-box{
+    width:220px;background:white;padding:15px;border-radius:12px;
+    border:2px solid #e60000;text-align:center;position:relative;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .product-box:hover{ transform: translateY(-5px); box-shadow:0 8px 20px rgba(0,0,0,0.2);}
+  .product-box img{ width:200px;height:150px;border-radius:10px;object-fit:contain; }
+  .product-box h3{ color:#b30000; margin-top:10px; font-size:17px; }
+  .product-box .btns{ display:flex; gap:10px; justify-content:center; margin-top:10px; }
+  .product-box button{
+    padding:8px 15px;border:none;border-radius:8px;
+    background:#b30000;color:white;cursor:pointer;font-weight:bold;
+    transition:0.3s;
+  }
+  .product-box button:hover{ background:#7a0000; transform: scale(1.05); }
+
+  /* ADD TO CART ANIMATION */
+  .flying-img{
+    position:fixed;width:120px;height:90px;border-radius:10px;
+    object-fit:contain;z-index:9999;pointer-events:none;
+    transition:all .7s ease-in-out;
+  }
+
+  /* MODAL */
+  .modal{
+    display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.6);justify-content:center;align-items:center;
+    animation:fadeIn 0.3s ease forwards;
+  }
+  .modal-content{
+    background:white;color:#222;width:400px;max-width:90%;
+    padding:25px;border-radius:15px;border:3px solid #b30000;
+    text-align:center;position:relative;animation:slideUp 0.4s ease forwards;
+  }
+  .modal-content img{ width:250px;border-radius:12px;margin-bottom:15px; }
+  .close{ position:absolute;right:15px;top:5px;font-size:28px;cursor:pointer;color:#b30000;transition:0.2s;}
+  .close:hover{ color:#7a0000; }
+  .checkout-btn{
+    margin-top:20px;padding:12px 25px;
+    background:#b30000;color:white;border:none;border-radius:8px;
+    cursor:pointer;font-weight:bold;transition:0.3s;
+  }
+  .checkout-btn:hover{ background:#7a0000;transform:scale(1.05); }
+
+  .details{
+    text-align:left;
+    margin-top:10px;
+    font-size:15px;
+    color:#555;
+  }
+  .details p{ margin:5px 0; }
+
+  @keyframes slideUp{
+    0%{transform: translateY(50px);opacity:0;}
+    100%{transform: translateY(0);opacity:1;}
+  }
+  @keyframes fadeIn{
+    0%{opacity:0;}
+    100%{opacity:1;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo">MotoShop</div>
+  <ul>
+    <li onclick="goHome()">HOME</li>
+    <li onclick="goProducts()">PRODUCT LIST</li>
+    <li onclick="goCart()">CART <span class="cart-count">0</span></li>
+  </ul>
+  <button class="logout-btn" onclick="logout()">LOGOUT</button>
+</div>
+
+<!-- SORT BOX -->
+<div class="sort-box">
+  <select id="sortSelect" onchange="sortProducts()">
+    <option value="default">Sort by Price</option>
+    <option value="low">Low to High</option>
+    <option value="high">High to Low</option>
+  </select>
+</div>
+
+<!-- PRODUCTS -->
+<div class="products-section" id="products"></div>
+
+<!-- PRODUCT DETAILS MODAL -->
+<div id="productModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeDetails()">&times;</span>
+    <img id="modalImage">
+    <h2 id="modalName" style="color:#b30000;"></h2>
+    <p id="modalPrice" style="font-weight:bold;"></p>
+    <p id="modalSold" style="color:#555;"></p>
+
+    <div class="details">
+      <p id="modalRating"></p>
+      <p id="modalMaterial"></p>
+      <p id="modalDescription"></p>
+    </div>
+
+    <button class="checkout-btn" onclick="addToCartFromModal()">Add to Cart</button>
+  </div>
+</div>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+document.querySelector(".cart-count").textContent = cart.length;
+
+const productsSection = document.getElementById("products");
+let selectedProduct = null;
+
+const products = [
+  {name:"Helmet", price:3800, sold:"120 Sold", img:"helmet.jpg", rating:"⭐⭐⭐⭐⭐", material:"ABS Plastic", description:"High-quality full-face helmet for ultimate protection."},
+  {name:"Gloves", price:600, sold:"80 Sold", img:"gloves.jpg", rating:"⭐⭐⭐⭐", material:"Leather", description:"Comfortable and durable motorcycle gloves."},
+  {name:"Motor Oil", price:190, sold:"200 Sold", img:"oil.jpg", rating:"⭐⭐⭐⭐⭐", material:"Synthetic Oil", description:"Keeps your engine running smoothly."},
+  {name:"Tire", price:800, sold:"45 Sold", img:"tire.jpg", rating:"⭐⭐⭐⭐", material:"Rubber", description:"Premium tire for better grip and safety."},
+  {name:"Brake Pads", price:60, sold:"150 Sold", img:"brake.jpg", rating:"⭐⭐⭐⭐", material:"Metal Ceramic", description:"High-performance brake pads."},
+  {name:"Chain", price:350, sold:"60 Sold", img:"chain.jpg", rating:"⭐⭐⭐⭐", material:"Steel", description:"Durable chain for long rides."},
+  {name:"Handle Grip", price:150, sold:"19 Sold", img:"grip.jpg", rating:"⭐⭐⭐⭐", material:"Rubber", description:"Ergonomic handle grips for comfort."},
+  {name:"Headlight", price:200, sold:"73 Sold", img:"headlight.jpg", rating:"⭐⭐⭐⭐⭐", material:"LED", description:"Bright LED headlight for better visibility."},
+  {name:"Battery", price:500, sold:"40 Sold", img:"battery.jpg", rating:"⭐⭐⭐⭐", material:"Lithium-Ion", description:"Reliable motorcycle battery."},
+  {name:"Mirror", price:300, sold:"56 Sold", img:"mirror.jpg", rating:"⭐⭐⭐⭐", material:"Glass/Metal", description:"Durable side mirrors."},
+  {name:"Air Filter", price:250, sold:"89 Sold", img:"airfilter.jpg", rating:"⭐⭐⭐⭐", material:"Cotton", description:"Keeps your engine clean and efficient."},
+  {name:"Spark Plug", price:120, sold:"134 Sold", img:"sparkplug.jpg", rating:"⭐⭐⭐⭐", material:"Ceramic", description:"Ensures smooth engine ignition."},
+  {name:"Engine Coolant", price:300, sold:"110 Sold", img:"coolant.jpg", rating:"⭐⭐⭐⭐", material:"Liquid Coolant", description:"Prevents engine overheating."},
+  {name:"Brake Fluid", price:150, sold:"77 Sold", img:"brakefluid.jpg", rating:"⭐⭐⭐⭐", material:"DOT4 Fluid", description:"Ensures responsive braking."},
+  {name:"LED Tail Light", price:280, sold:"92 Sold", img:"taillight.jpg", rating:"⭐⭐⭐⭐", material:"LED", description:"Stylish rear light for safety."},
+  {name:"Motorcycle Cover", price:450, sold:"58 Sold", img:"cover.jpg", rating:"⭐⭐⭐⭐", material:"Waterproof Fabric", description:"Protects your bike from dust and rain."}
+];
+
+// Render products
+function displayProducts(list){
+  productsSection.innerHTML = "";
+  list.forEach((p)=>{
+    let div = document.createElement("div");
+    div.className = "product-box";
+    div.innerHTML = `
+      <img src="${p.img}">
+      <h3>${p.name} - ₱${p.price}</h3>
+      <div class="btns">
+        <button onclick="addToCart('${p.name}', '${p.img}')">Add</button>
+        <button onclick="openDetails('${p.name}')">View</button>
+      </div>
+    `;
+    productsSection.appendChild(div);
+  });
+}
+
+displayProducts(products);
+
+// SORTING
+function sortProducts(){
+  let type = document.getElementById("sortSelect").value;
+  let sorted = [...products];
+
+  if(type === "low"){ sorted.sort((a,b)=> a.price - b.price); }
+  else if(type === "high"){ sorted.sort((a,b)=> b.price - a.price); }
+
+  displayProducts(sorted);
+}
+
+// ADD TO CART + ANIMATION
+function addToCart(name, imgSrc){
+  cart.push(name);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  document.querySelector(".cart-count").textContent = cart.length;
+  flyToCart(imgSrc);
+  setTimeout(()=>{ alert(name + " added to cart!"); }, 300);
+}
+
+function flyToCart(imgSrc){
+  let cartIcon = document.querySelector(".cart-count");
+  let img = document.createElement("img");
+  img.src = imgSrc; img.className = "flying-img"; document.body.appendChild(img);
+
+  let startX = window.innerWidth / 2; let startY = window.innerHeight / 2;
+  img.style.left = startX + "px"; img.style.top = startY + "px";
+  let cartRect = cartIcon.getBoundingClientRect();
+
+  setTimeout(()=>{
+    img.style.left = cartRect.left + "px";
+    img.style.top = cartRect.top + "px";
+    img.style.width = "20px";
+    img.style.height = "20px";
+    img.style.opacity = "0";
+  }, 10);
+
+  setTimeout(()=> img.remove(), 700);
+}
+
+// MODAL FUNCTIONS
+function openDetails(name){
+  selectedProduct = name;
+  let item = products.find(p=>p.name===name);
+
+  document.getElementById("modalName").textContent = item.name;
+  document.getElementById("modalPrice").textContent = "Price: ₱" + item.price;
+  document.getElementById("modalSold").textContent = item.sold;
+  document.getElementById("modalImage").src = item.img;
+  document.getElementById("modalRating").textContent = "Rating: " + item.rating;
+  document.getElementById("modalMaterial").textContent = "Material: " + item.material;
+  document.getElementById("modalDescription").textContent = item.description;
+
+  document.getElementById("productModal").style.display = "flex";
+}
+
+function closeDetails(){ document.getElementById("productModal").style.display = "none"; }
+
+// NEW FUNCTION: ADD FROM MODAL AND REDIRECT
+function addToCartFromModal() {
+  if (!selectedProduct) return;
+  let item = products.find(p => p.name === selectedProduct);
+
+  cart.push(item.name);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  document.querySelector(".cart-count").textContent = cart.length;
+
+  flyToCart(item.img);
+  closeDetails();
+
+  setTimeout(()=>{
+    window.location.href = "cart.html";
+  }, 300);
+}
+
+// NAVIGATION
+function goHome(){ window.location.href="home.html"; }
+function goProducts(){ location.reload(); }
+function goCart(){ window.location.href="cart.html"; }
+function logout(){ localStorage.removeItem("cart"); alert("Logged out"); window.location.href="login.html"; }
+
+</script>
+</body>
+</html>

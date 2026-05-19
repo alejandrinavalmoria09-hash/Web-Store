@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MotoShop - Cart</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial;background:white;color:#8b0000;padding-bottom:50px;}
+
+  /* Navbar */
+  .navbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:15px 50px;
+    background:#b30000;
+  }
+  .navbar .logo{font-size:28px;font-weight:bold;color:white;}
+  .navbar ul{list-style:none;display:flex;gap:35px;}
+  .navbar ul li{font-size:16px;font-weight:bold;cursor:pointer;color:white;}
+  .navbar ul li:hover{color:#ffd6d6;}
+  .cart-count{color:#ffd6d6;font-weight:bold;}
+  .logout-btn{
+    padding:8px 18px;
+    border:none;
+    border-radius:8px;
+    background:white;
+    color:#b30000;
+    cursor:pointer;
+    font-weight:bold;
+  }
+  .logout-btn:hover{background:#ffd6d6;}
+
+  /* Cart Title */
+  .cart-title{
+    font-size:28px;
+    font-weight:bold;
+    color:#b30000;
+    padding:30px 50px 0 50px;
+    text-align:left;
+  }
+
+  /* Cart Section */
+  .cart-section{padding:20px 50px; display:flex; flex-wrap:wrap; gap:30px; justify-content:flex-start;}
+  .cart-item{
+    width:220px;
+    background:#fff0f0;
+    padding:15px;
+    border-radius:12px;
+    border:2px solid #b30000;
+    text-align:center;
+    position:relative;
+    transition: transform 0.3s ease;
+  }
+  .cart-item:hover{transform: scale(1.05);}
+  .cart-item img{width:200px;height:150px;border-radius:8px;}
+  .cart-item p{margin-top:10px;font-size:16px;color:#8b0000;font-weight:bold;}
+
+  .remove-btn { padding:8px 15px; border:none; border-radius:8px; background:#b30000; color:white; cursor:pointer; }
+  .remove-btn:hover { background:#ff4d4d; }
+
+  .checkout-btn {
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    background:white;
+    color:#b30000;
+    cursor:pointer;
+    font-weight:bold;
+  }
+  .checkout-btn:hover { background:#ffd6d6; }
+
+  /* Checkout Modal */
+  .modal-bg{
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.6);
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+  }
+  .checkout-modal{
+    width:380px;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    border:3px solid #b30000;
+  }
+  .checkout-modal h2{
+    text-align:center;
+    color:#b30000;
+    margin-bottom:15px;
+  }
+  .input-box{
+    display:flex;
+    flex-direction:column;
+    margin-bottom:10px;
+  }
+  .input-box label{font-weight:bold; color:#8b0000;}
+  .input-box input{
+    padding:8px;
+    border:2px solid #b30000;
+    border-radius:8px;
+    margin-top:5px;
+  }
+  .submit-btn{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    background:#b30000;
+    color:white;
+    font-weight:bold;
+    margin-top:15px;
+    cursor:pointer;
+  }
+  .submit-btn:hover{background:#7a0000;}
+
+  .close-btn{
+    width:100%;
+    padding:10px;
+    border:none;
+    background:#777;
+    border-radius:8px;
+    margin-top:8px;
+    color:white;
+    cursor:pointer;
+  }
+  .close-btn:hover{background:#555;}
+
+  /* Flying Animation */
+  .flying-img{
+    position:fixed;
+    width:120px;
+    height:90px;
+    border-radius:10px;
+    object-fit:contain;
+    z-index:9999;
+    pointer-events:none;
+    transition: all 0.7s ease-in-out;
+  }
+</style>
+</head>
+<body>
+
+<!-- CHECKOUT FORM POPUP -->
+<div class="modal-bg" id="checkoutForm">
+  <div class="checkout-modal">
+    <h2>Checkout Details</h2>
+
+    <div class="input-box">
+      <label>First Name:</label>
+      <input id="fname">
+    </div>
+
+    <div class="input-box">
+      <label>Last Name:</label>
+      <input id="lname">
+    </div>
+
+    <div class="input-box">
+      <label>Contact #:</label>
+      <input id="contact">
+    </div>
+
+    <div class="input-box">
+      <label>Complete Address:</label>
+      <input id="address">
+    </div>
+
+    <button class="submit-btn" onclick="submitCheckout()">Submit Checkout</button>
+    <button class="close-btn" onclick="closeForm()">Cancel</button>
+  </div>
+</div>
+
+<div class="navbar">
+  <div class="logo">MotoShop</div>
+  <ul>
+    <li onclick="goHome()">HOME</li>
+    <li onclick="goProducts()">PRODUCT LIST</li>
+    <li onclick="goCart()">CART <span class="cart-count">0</span></li>
+    <li onclick="goHistory()">HISTORY</li>
+  </ul>
+  <button class="logout-btn" onclick="logout()">LOGOUT</button>
+</div>
+
+<div class="cart-title">Your Cart</div>
+<div class="cart-section" id="cartSection"></div>
+
+<script>
+  const products = [
+    {name:"Helmet", price:3800, img:"helmet.jpg"},
+    {name:"Gloves", price:600, img:"gloves.jpg"},
+    {name:"Motor Oil", price:190, img:"oil.jpg"},
+    {name:"Tire", price:800, img:"tire.jpg"},
+    {name:"Brake Pads", price:60, img:"brake.jpg"},
+    {name:"Chain", price:350, img:"chain.jpg"},
+    {name:"Handle Grip", price:150, img:"grip.jpg"},
+    {name:"Headlight", price:200, img:"headlight.jpg"},
+    {name:"Battery", price:500, img:"battery.jpg"},
+    {name:"Mirror", price:300, img:"mirror.jpg"},
+    {name:"Air Filter", price:250, img:"airfilter.jpg"},
+    {name:"Spark Plug", price:120, img:"sparkplug.jpg"},
+    {name:"Engine Coolant", price:300, img:"coolant.jpg"},
+    {name:"Brake Fluid", price:150, img:"brakefluid.jpg"},
+    {name:"LED Tail Light", price:280, img:"taillight.jpg"},
+    {name:"Motorcycle Cover", price:450, img:"cover.jpg"}
+  ];
+
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let history = JSON.parse(localStorage.getItem("history")) || [];
+  const cartCount = document.querySelector(".cart-count");
+  const cartSection = document.getElementById("cartSection");
+
+  let selectedIndex = null;
+
+  function displayCart() {
+    cartSection.innerHTML = "";
+
+    if (cart.length === 0) {
+      cartSection.innerHTML = "<h2 style='color:#b30000;'>Your cart is empty.</h2>";
+      cartCount.textContent = 0;
+      return;
+    }
+
+    cart.forEach((productName, index) => {
+      const product = products.find(p => p.name === productName);
+
+      if (product) {
+        let div = document.createElement("div");
+        div.className = "cart-item";
+
+        div.innerHTML = `
+          <img src="${product.img}">
+          <p>${product.name} - ₱${product.price}</p>
+          <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+            <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+            <button class="checkout-btn" onclick="openCheckout(${index})">Checkout</button>
+          </div>
+        `;
+        cartSection.appendChild(div);
+      }
+    });
+
+    cartCount.textContent = cart.length;
+  }
+
+  function removeItem(index) {
+    if (confirm("Remove this item?")) {
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      displayCart();
+    }
+  }
+
+  function openCheckout(index){
+    selectedIndex = index;
+    document.getElementById("checkoutForm").style.display = "flex";
+  }
+
+  function closeForm(){
+    document.getElementById("checkoutForm").style.display = "none";
+  }
+
+  function submitCheckout(){
+    let fname = document.getElementById("fname").value.trim();
+    let lname = document.getElementById("lname").value.trim();
+    let contact = document.getElementById("contact").value.trim();
+    let address = document.getElementById("address").value.trim();
+
+    if(!fname || !lname || !contact || !address){
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    const itemName = cart[selectedIndex];
+    const product = products.find(p => p.name === itemName);
+
+    history.push({
+      name: product.name,
+      price: product.price,
+      img: product.img,
+      fname,
+      lname,
+      contact,
+      address,
+      date: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("history", JSON.stringify(history));
+
+    cart.splice(selectedIndex, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    closeForm();
+
+    alert("Checkout Completed!");
+    displayCart();
+  }
+
+  function goHome(){ window.location.href="home.html"; }
+  function goProducts(){ window.location.href="products.html"; }
+  function goCart(){ location.reload(); }
+  function goHistory(){ window.location.href="history.html"; }
+
+  function logout(){
+    localStorage.removeItem("cart");
+    alert("Logged out");
+    location.href="home.html";
+  }
+
+  displayCart();
+</script>
+
+</body>
+</html>

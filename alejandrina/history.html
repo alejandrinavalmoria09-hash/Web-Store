@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Checkout History</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  body{
+    font-family:Arial;
+    background:white;
+    color:#222;
+    padding:40px;
+  }
+
+  h1{
+    color:#b30000;
+    text-align:center;
+    font-size:40px;
+    margin-bottom:30px;
+  }
+
+  /* History card */
+  .item{
+    background:#ffffff;
+    padding:20px;
+    border-radius:15px;
+    margin-bottom:20px;
+    border:2px solid #cc0000;
+    display:flex;
+    justify-content:flex-start;
+    align-items:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+
+    opacity:0;
+    transform:translateY(30px);
+    animation:fadeSlideIn 0.5s forwards;
+  }
+
+  @keyframes fadeSlideIn{
+    to{
+      opacity:1;
+      transform:translateY(0);
+    }
+  }
+
+  .left{
+    display:flex;
+    gap:20px;
+    align-items:center;
+  }
+
+  img{
+    width:130px;
+    height:100px;
+    object-fit:cover;
+    border-radius:12px;
+    border:2px solid #cc0000;
+  }
+
+  p{margin:5px 0;font-size:18px;}
+
+  .back-btn{
+    display:block;
+    margin:25px auto 0;
+    padding:12px 30px;
+    background:#b30000;
+    color:white;
+    border:none;
+    border-radius:25px;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:bold;
+  }
+
+  .back-btn:hover{
+    background:#800000;
+  }
+</style>
+</head>
+<body>
+
+<h1>Checkout History</h1>
+
+<div id="historyList"></div>
+
+<button class="back-btn" onclick="goBack()">Back to Cart</button>
+
+<script>
+
+  let history = JSON.parse(localStorage.getItem("history")) || [];
+  const list = document.getElementById("historyList");
+
+  function loadHistory() {
+    list.innerHTML = "";
+
+    if (history.length === 0) {
+      list.innerHTML = "<h2 style='text-align:center;color:#555;'>No checkout history yet.</h2>";
+      return;
+    }
+
+    history.forEach((item, index) => {
+  list.innerHTML += `
+    <div class="item" style="animation-delay:${index*0.1}s">
+      <div class="left">
+        <img src="${item.img}">
+        <div>
+          <p><strong>${item.name}</strong></p>
+          <p>₱${item.price}</p>
+          <p><small>${item.date}</small></p>
+
+          <br>
+
+          <p><strong>Customer Info:</strong></p>
+          <p>Name: ${item.fname} ${item.lname}</p>
+          <p>Contact: ${item.contact}</p>
+          <p>Address: ${item.address}</p>
+        </div>
+      </div>
+    </div>
+  `;
+});
+
+  }
+
+  loadHistory();
+
+  function goBack(){
+    window.location.href = "cart.html";
+  }
+</script>
+
+</body>
+</html>

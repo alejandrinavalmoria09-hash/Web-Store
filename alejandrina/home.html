@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MotoShop - Home</title>
+
+<style>
+  /* RESET */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:Arial; background:#ffffff; color:#222; overflow-x:hidden; }
+
+  /* NAVBAR */
+  .navbar { 
+    display:flex; 
+    align-items:center; 
+    justify-content:space-between; 
+    padding:15px 50px; 
+    background:#b30000; 
+    border-bottom:3px solid #7a0000; 
+  }
+  .navbar .logo {
+    font-size:28px;
+    font-weight:bold;
+    color:white;
+    letter-spacing:1px;
+  }
+  .navbar ul { list-style:none; display:flex; gap:35px; align-items:center; }
+  .navbar ul li { font-size:16px; font-weight:bold; cursor:pointer; color:white; }
+  .navbar ul li:hover { color:#ffe3e3; text-shadow:0 0 8px #ffffff; }
+  .cart-count { color:#ffeded; font-weight:bold; }
+  .logout-btn { padding:8px 18px; border:2px solid white; border-radius:8px; background:white; color:#b30000; cursor:pointer; font-weight:bold; }
+  .logout-btn:hover { background:#ffe6e6; }
+
+  /* HOME SECTION */
+  .home-section { display:flex; justify-content:space-between; align-items:center; padding:100px 80px; background:#ffffff; flex-wrap:wrap; gap:40px; }
+  .home-text { max-width:500px; opacity:0; transform:translateY(30px); animation:fadeUp 0.8s forwards; animation-delay:0.2s; }
+  .home-text h1 { font-size:47px; font-weight:bold; color:#b30000; }
+  .home-text span { color:#7a0000; }
+  .home-text p { font-size:18px; margin-top:10px; color:#333; }
+  .start-btn { margin-top:25px; padding:12px 28px; font-size:17px; border-radius:8px; background:#b30000; color:white; border:none; cursor:pointer; }
+  .start-btn:hover { background:#7a0000; }
+
+  /* PRODUCT SLIDER BOX */
+  .home-box { width:370px; height:300px; border-radius:15px; border:3px solid #b30000; background:#f9f9f9; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; overflow:hidden; padding-top:10px; opacity:0; transform:translateY(30px); animation:fadeUp 0.8s forwards; animation-delay:0.4s; }
+  .slider { width:100%; height:220px; display:flex; justify-content:center; align-items:center; overflow:hidden; }
+  .slider img { width:100%; height:100%; object-fit:contain; transition:transform 0.5s ease; }
+  .product-info { text-align:center; margin-top:5px; opacity:0; transform:translateY(10px); transition:all 0.5s ease; }
+  .product-name { font-size:20px; font-weight:bold; color:#b30000; }
+  .product-price { font-size:18px; color:#333; }
+  .arrow { position:absolute; top:45%; transform:translateY(-50%); background:#b30000; color:white; border:none; padding:10px 15px; font-size:25px; cursor:pointer; border-radius:50%; }
+  .arrow.left { left:10px; }
+  .arrow.right { right:10px; }
+  .arrow:hover { background:#7a0000; }
+
+  /* ABOUT US */
+  .about-section { padding:80px 50px; background:#fafafa; text-align:center; opacity:0; transform:translateY(30px); animation:fadeUp 0.8s forwards; animation-delay:0.6s; }
+  .about-section h2 { font-size:36px; color:#b30000; margin-bottom:25px; font-weight:bold; }
+  .about-section p { font-size:18px; color:#444; max-width:800px; margin:0 auto 20px auto; line-height:1.6; }
+
+  /* CONTACT MODAL */
+  .modal-bg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; }
+  .contact-modal { width:380px; background:white; padding:25px; border-radius:15px; border:3px solid #b30000; text-align:center; }
+  .contact-modal h2 { color:#b30000; margin-bottom:20px; }
+  .contact-item { display:flex; align-items:center; gap:15px; background:#fff0f0; padding:12px; border-radius:10px; margin-bottom:12px; }
+  .contact-item img { width:30px; height:30px; }
+  textarea { width:100%; height:120px; padding:10px; border:2px solid #b30000; border-radius:10px; resize:none; font-size:15px; }
+  .close-btn { margin-top:20px; padding:8px 20px; background:#b30000; border:none; border-radius:8px; cursor:pointer; font-weight:bold; color:white; }
+  .close-btn:hover { background:#7a0000; }
+
+  /* ANIMATION */
+  @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo">MotoShop</div>
+  <ul>
+    <li onclick="goHome()">HOME</li>
+    <li onclick="openContact()">CONTACT</li>
+    <li onclick="goProducts()">PRODUCT LIST</li>
+    <li onclick="goCart()">CART <span class="cart-count">0</span></li>
+  </ul>
+  <button class="logout-btn" onclick="logout()">LOGOUT</button>
+</div>
+
+<!-- HOME SECTION -->
+<div class="home-section">
+  <div class="home-text">
+    <h1>Welcome to <span>MotoShop</span></h1>
+    <p>Your trusted online shop for motorcycle parts and accessories.</p>
+    <button class="start-btn" onclick="goProducts()">START SHOPPING</button>
+  </div>
+
+  <div class="home-box">
+    <div class="slider">
+      <img id="slide-image" src="helmet.jpg" alt="Product Image">
+    </div>
+    <div class="product-info" id="product-info">
+      <div id="prod-name" class="product-name">Helmet</div>
+      <div id="prod-price" class="product-price">₱3800</div>
+    </div>
+    <button class="arrow left" onclick="prevImage()">&#10094;</button>
+    <button class="arrow right" onclick="nextImage()">&#10095;</button>
+  </div>
+</div>
+
+<!-- ABOUT US -->
+<div class="about-section">
+  <h2>About Us</h2>
+  <p style="max-width:850px; margin:0 auto; white-space:pre-line; line-height:1.8; font-size:18px; color:#444;">
+MotoShop is your trusted partner on the road.
+Built by riders, for riders — we are dedicated to providing high-quality motorcycle parts, gears, and accessories that keep you safe, stylish, and confident in every ride.
+
+For years, MotoShop has been committed to:
+
+🛠️ Supplying durable and affordable parts tested for quality  
+🏍️ Supporting every type of rider — from daily commuters to long-distance adventurers  
+⚡ Delivering fast and reliable service nationwide  
+❤️ Ensuring your safety and satisfaction with every purchase  
+
+At MotoShop, we believe that every rider deserves the best.
+That’s why we carefully select our products, offer honest prices, and treat every customer like family.
+
+<p style="font-size:20px; color:#7a0000; font-weight:bold; text-align:center;">
+    At MotoShop, your journey matters.<br>
+    Your ride is our passion.
+</p>
+
+  </p>
+</div>
+
+<!-- CONTACT MODAL -->
+<div class="modal-bg" id="contactModal">
+  <div class="contact-modal">
+    <h2>Contact Us</h2>
+    <div class="contact-item"><img src="fb.png"><span>Facebook: <b>MotoShop Official</b></span></div>
+    <div class="contact-item"><img src="tiktok.png"><span>TikTok: <b>MotoShopy</b></span></div>
+    <div class="contact-item"><img src="call.png"><span>Call: <b>09236781378</b></span></div>
+    <div class="contact-item"><img src="email.png"><span>Email: <b>motoshop@gmail.com</b></span></div>
+    <textarea id="userMessage" placeholder="Message us here..."></textarea>
+    <button onclick="sendMessage()" style="margin-top:15px; padding:10px 20px; background:#b30000; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">Send</button>
+    <button class="close-btn" onclick="closeContact()">Close</button>
+  </div>
+</div>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+document.querySelector(".cart-count").textContent = cart.length;
+
+function goHome(){ location.reload(); }
+function goProducts(){ window.location.href="products.html"; }
+function goCart(){ window.location.href="cart.html"; }
+function logout(){ localStorage.removeItem("cart"); alert("Logged out"); window.location.href="login.html"; }
+
+/* PRODUCT SLIDER */
+let products = [
+  {name:"Helmet", price:3800, img:"helmet.jpg"},
+  {name:"Gloves", price:600, img:"gloves.jpg"},
+  {name:"Motor Oil", price:190, img:"oil.jpg"},
+  {name:"Tire", price:800, img:"tire.jpg"},
+  {name:"Brake Pads", price:60, img:"brake.jpg"},
+  {name:"Chain", price:350, img:"chain.jpg"},
+  {name:"Handle Grip", price:150, img:"grip.jpg"},
+  {name:"Headlight", price:200, img:"headlight.jpg"},
+  {name:"Battery", price:500, img:"battery.jpg"},
+  {name:"Mirror", price:300, img:"mirror.jpg"},
+  
+  // New products from products.html
+  {name:"Air Filter", price:250, sold:"89 Sold", img:"airfilter.jpg"},
+  {name:"Spark Plug", price:120, sold:"134 Sold", img:"sparkplug.jpg"},
+  {name:"Engine Coolant", price:300, sold:"110 Sold", img:"coolant.jpg"},
+  {name:"Brake Fluid", price:150, sold:"77 Sold", img:"brakefluid.jpg"},
+  {name:"LED Tail Light", price:280, sold:"92 Sold", img:"taillight.jpg"},
+  {name:"Motorcycle Cover", price:450, sold:"58 Sold", img:"cover.jpg"}
+];
+
+let index = 0;
+function updateSlider() {
+  const imgEl = document.getElementById("slide-image");
+  const infoEl = document.getElementById("product-info");
+
+  // Animate image zoom
+  imgEl.style.transform = "scale(0.8)";
+  setTimeout(()=> imgEl.style.transform = "scale(1)", 50);
+
+  // Animate text fade-in
+  infoEl.style.opacity = 0;
+  setTimeout(()=> infoEl.style.opacity = 1, 200);
+
+  document.getElementById("slide-image").src = products[index].img;
+  document.getElementById("prod-name").textContent = products[index].name;
+  document.getElementById("prod-price").textContent = "₱" + products[index].price;
+}
+
+function nextImage() { index = (index + 1) % products.length; updateSlider(); }
+function prevImage() { index = (index - 1 + products.length) % products.length; updateSlider(); }
+setInterval(nextImage, 4000);
+
+/* CONTACT MODAL */
+function openContact(){ document.getElementById("contactModal").style.display = "flex"; }
+function closeContact(){ document.getElementById("contactModal").style.display = "none"; }
+function sendMessage(){
+  let msg = document.getElementById("userMessage").value;
+  if(msg.trim() === ""){ alert("Please enter a message before sending."); return; }
+  alert("Message sent!");
+  document.getElementById("userMessage").value = "";
+}
+</script>
+
+</body>
+</html>
